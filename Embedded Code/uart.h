@@ -10,6 +10,8 @@
 
 int Configure_BlueSMiRF();
 
+int Send_Data(char);
+
 
 
 #endif /* UART_H_ */
