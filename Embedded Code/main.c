@@ -1,8 +1,13 @@
 #include <msp430.h> 
 #include "uart.h"
+#include "main.h"
 /*
  * main.c
  */
+
+char sine_wave[200];
+int i = 0;
+
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;			// Stop watchdog timer
 	
@@ -19,13 +24,35 @@ int main(void) {
     P1SEL2 = BIT1 + BIT2;
 
     P1SEL |= BIT6 + BIT7;				// P1.6 and 1.7 for USCI_B0
-    P1SEL2 = BIT6 + BIT7;
+    P1SEL2 |= BIT6 + BIT7;
+
+    Setup_Sine();
 
     Configure_BlueSMiRF();
+    __enable_interrupt();
 
+    i = 0;
     while(1)
     {
-    	Send_Data(0x80);
+
     }
-	return 0;
+}
+
+void Setup_Sine()
+{
+	while(i < 200)
+	{
+		sine_wave[i] = 100 - (i%10);
+		i++;
+	}
+}
+
+void Send_Sine()
+{
+	Send_Data(sine_wave[i]);
+	i++;
+	if(i == 100)
+	{
+		i = 0;
+	}
 }
