@@ -8,6 +8,7 @@
 
 #include <msp430.h>
 
+char data_to_send;
 
 int Configure_BlueSMiRF()
 {
@@ -18,24 +19,31 @@ int Configure_BlueSMiRF()
 	UCA0MCTL = UCBRS0;				// Modulation UCBRSx = 1
 									// CHECK ME
 	UCA0CTL1 &= ~UCSWRST;			// Initialize USCI
-	IE2 |= UCA0TXIE;                // Enable USCI_A0 TX interrupt
+	//IE2 |= UCA0TXIE;
 }
 
 int Send_Data(char byte)
 {
-	while (!(IFG2&UCA0TXIFG));                // Wait until USCI_A0 TX buffer ready
-	UCA0TXBUF = byte;                    // Send byte
+	data_to_send = byte;
+	IE2 |= UCA0TXIE;				// Enable USCI_A0 TX interrupt
 }
 
+#pragma vector = USCIAB0TX_VECTOR
+__interrupt void USCIAB0TX_ISR(void)
+{
+	if((IFG2&UCA0TXIFG)) // && (IE2&UCA0TXIE)?
+	{
+		UCA0TXBUF = data_to_send;
+		IE2 &= ~UCA0TXIE;
+	}
+}
 
-#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
 #pragma vector=USCIAB0RX_VECTOR
 __interrupt void USCI0RX_ISR(void)
-#elif defined(__GNUC__)
-void __attribute__ ((interrupt(USCIAB0RX_VECTOR))) USCI0RX_ISR (void)
-#else
-#error Compiler not supported!
-#endif
 {
 	// Received character. Do something?
 }
+
+
+
+
