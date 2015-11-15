@@ -10,7 +10,7 @@
 
 int Configure_BlueSMiRF();
 
-int Send_Data(char);
+void Send_Data();
 
 
 

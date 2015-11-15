@@ -8,12 +8,11 @@
 
 #include <msp430.h>
 
-char data_to_send[2];
 int index;
+extern char output[6];
 
 int Configure_BlueSMiRF()
 {
-	data_to_send[1] = 0x0A;
 	index = 0;
 	UCA0CTL1 |= UCSSEL_2;			// SMCLK as source
 	UCA0BR0 = 104;					// 9600 Baudrate with 1Mhz clock
@@ -25,9 +24,8 @@ int Configure_BlueSMiRF()
 	IE2 |= UCA0TXIE;
 }
 
-int Send_Data(char byte)
+void Send_Data()
 {
-	data_to_send[0] = byte;
 	IE2 |= UCA0TXIE;				// Enable USCI_A0 TX interrupt
 }
 
@@ -36,9 +34,9 @@ __interrupt void USCIAB0TX_ISR(void)
 {
 	if((IFG2&UCA0TXIFG) && (IE2&UCA0TXIE))
 	{
-		UCA0TXBUF = data_to_send[index];
-		index++;
-		if(index == 2)
+		UCA0TXBUF = output[index];
+		index ++;
+		if(index == 6)
 		{
 			index = 0;
 			IE2 &= ~UCA0TXIE;
